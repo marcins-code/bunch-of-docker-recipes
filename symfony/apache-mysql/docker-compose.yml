@@ -1,0 +1,34 @@
+version: '3.4'
+
+services:
+  website:
+    container_name: ${PROJECT_NAME}_apache
+    build: ./docker/apache/
+    volumes:
+      - ./app:/var/www/html
+      - ./docker/config/vhost.conf:/etc/apache2/sites-available/000-default.conf
+      - ./docker/.bashrc:/root/.bashrc
+    ports:
+      - 8006:80
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html/public
+    networks:
+      - symfony
+  database:
+    container_name: mysql
+    restart: always
+    image: mysql:${MYSQL_VERSION}
+    command: [ "--default-authentication-plugin=mysql_native_password" ]
+    ports:
+      - ${MYSQL_EXPOSRED_PORT}:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - ./database:/var/lib/mysql
+    networks:
+      - symfony
+networks:
+  symfony:
